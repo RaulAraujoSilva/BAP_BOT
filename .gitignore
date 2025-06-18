@@ -1,0 +1,29 @@
+# Arquivos de configuração com credenciais
+config.env
+.env
+
+# Arquivos Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Ambientes virtuais
+venv/
+env/
+ENV/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Outros
+.DS_Store
+Thumbs.db 
