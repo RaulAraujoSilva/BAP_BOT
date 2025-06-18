@@ -1,4 +1,5 @@
 import openai
+import asyncio
 import time
 import json
 import os
@@ -27,6 +28,11 @@ class ChatBotCondominio:
             api_key=api_key,
             organization=organization_id
         )
+        # Cliente assíncrono para chamadas non-blocking
+        self.async_client = openai.AsyncOpenAI(
+            api_key=api_key,
+            organization=organization_id
+        )
         
         # ID do assistente fornecido
         self.assistant_id = assistant_id
@@ -44,23 +50,38 @@ class ChatBotCondominio:
         except Exception as e:
             print(f"Erro ao criar thread: {e}")
             return None
+
+    async def criar_thread_async(self):
+        """Versão assíncrona para criar nova thread"""
+        try:
+            thread = await self.async_client.beta.threads.create()
+            self.thread_id = thread.id
+            print(f"Thread criada: {self.thread_id}")
+            return thread
+        except Exception as e:
+            print(f"Erro ao criar thread: {e}")
+            return None
     
     def enviar_mensagem(self, mensagem: str) -> str:
+        """Envia uma mensagem de forma síncrona"""
+        return asyncio.run(self.enviar_mensagem_async(mensagem))
+
+    async def enviar_mensagem_async(self, mensagem: str) -> str:
         """Envia uma mensagem para o assistente e retorna a resposta"""
         try:
             # Cria thread se não existir
             if not self.thread_id:
-                self.criar_thread()
+                await self.criar_thread_async()
             
             # Adiciona mensagem à thread
-            message = self.client.beta.threads.messages.create(
+            await self.async_client.beta.threads.messages.create(
                 thread_id=self.thread_id,
                 role="user",
                 content=mensagem
             )
             
             # Executa o assistente
-            run = self.client.beta.threads.runs.create(
+            run = await self.async_client.beta.threads.runs.create(
                 thread_id=self.thread_id,
                 assistant_id=self.assistant_id,
                 instructions="""Você é um assistente de condomínio especializado. 
@@ -75,18 +96,19 @@ class ChatBotCondominio:
                 Seja sempre cordial, profissional e útil."""
             )
             
-            # Aguarda a conclusão do run
+            # Aguarda a conclusão do run com intervalo menor
             while run.status in ['queued', 'in_progress', 'cancelling']:
-                time.sleep(1)
-                run = self.client.beta.threads.runs.retrieve(
+                await asyncio.sleep(0.5)
+                run = await self.async_client.beta.threads.runs.retrieve(
                     thread_id=self.thread_id,
                     run_id=run.id
                 )
             
             if run.status == 'completed':
                 # Recupera as mensagens
-                messages = self.client.beta.threads.messages.list(
-                    thread_id=self.thread_id
+                messages = await self.async_client.beta.threads.messages.list(
+                    thread_id=self.thread_id,
+                    limit=1
                 )
                 
                 # Pega a última mensagem do assistente
