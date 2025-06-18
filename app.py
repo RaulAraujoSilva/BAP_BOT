@@ -104,7 +104,12 @@ def health():
     })
 
 if __name__ == '__main__':
-    print("🚀 Iniciando servidor do ChatBot Condomínio...")
-    print("📱 Interface disponível em: http://localhost:5000")
-    print("🔗 API disponível em: http://localhost:5000/api/")
-    app.run(debug=True, host='0.0.0.0', port=5000) 
+    import os
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('FLASK_ENV') != 'production'
+    
+    print("🚀 Iniciando servidor do BAP Bot Condomínios...")
+    print(f"📱 Interface disponível na porta: {port}")
+    print("🔗 API disponível em: /api/")
+    
+    app.run(debug=debug, host='0.0.0.0', port=port) 
