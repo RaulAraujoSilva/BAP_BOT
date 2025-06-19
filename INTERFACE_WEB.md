@@ -1,4 +1,4 @@
-# 🌐 Interface Web - ChatBot Condomínio
+# 🌐 Interface Web - BapGPT Condomínios
 
 ## 📱 Visão Geral
 
@@ -20,28 +20,29 @@ A interface web foi desenvolvida com **estilo WhatsApp moderno**, oferecendo uma
 ## 🎨 Características da Interface
 
 ### 📋 Layout Principal
-- **Header verde** - Estilo WhatsApp com avatar e status
+- **Header com gradiente** - Estilo moderno com logo BapGPT
 - **Área de mensagens** - Scroll automático com fundo sutil
 - **Campo de entrada** - Auto-resize com contador de caracteres
-- **Botões de ação** - Nova conversa e informações
+- **Botões personalizados** - Ícones customizados para ações
 
 ### 💬 Sistema de Mensagens
 
 #### 👤 Mensagens do Usuário
 - **Cor:** Verde claro (como WhatsApp)
 - **Posição:** Lado direito
-- **Avatar:** Ícone de usuário azul
+- **Avatar:** Imagem personalizada do usuário
 
 #### 🤖 Mensagens do Assistente
 - **Cor:** Branco com sombra
 - **Posição:** Lado esquerdo  
-- **Avatar:** Ícone de robô verde
+- **Avatar:** Logo BapGPT
 
 #### ⏰ Funcionalidades Especiais
 - **Timestamps** em cada mensagem
 - **Indicador de digitação** animado
 - **Formatação** de texto (negrito, itálico)
 - **Quebras de linha** automáticas
+- **Avatares personalizados** com imagens específicas
 
 ## 🔧 Tecnologias Utilizadas
 
@@ -55,8 +56,9 @@ A interface web foi desenvolvida com **estilo WhatsApp moderno**, oferecendo uma
 - **HTML5** - Estrutura semântica
 - **CSS3** - Gradientes e animações
 - **JavaScript (ES6+)** - Funcionalidades interativas
-- **Font Awesome** - Ícones
+- **Font Awesome** - Ícones (complementar)
 - **Google Fonts** - Tipografia Roboto
+- **Imagens Customizadas** - Assets organizados
 
 ## 📡 API Endpoints
 
@@ -76,82 +78,52 @@ Recupera histórico da sessão
 Cria nova sessão de chat
 
 ### `GET /health`
-Verifica status do servidor
+Verificação de saúde da aplicação
 
-## 🎯 Funcionalidades Implementadas
+## 🎨 Assets e Recursos Visuais
 
-### ✅ Gerenciamento de Sessões
-- ID único por conversa
-- Histórico mantido por sessão
-- Possibilidade de múltiplas sessões
+### 📁 Organização em `static/assets/`
+- **bapgpt-logo.png** - Logo principal (40x40px no header)
+- **Usuário.png** - Avatar do usuário (24x24px nas mensagens)
+- **SetaSubmeter.png** - Ícone do botão enviar (24x24px)
+- **Icone_superior1.jpg** - Botão nova conversa (24x24px)
+- **Icone_superior2.jpg** - Botão informações (24x24px)
 
-### ✅ Interface Responsiva
-- Adaptável a diferentes telas
-- Mobile-friendly
-- Animações suaves
+### 🖼️ Aplicação das Imagens
+- **Header:** Logo BapGPT com bordas arredondadas
+- **Mensagens:** Avatares específicos por tipo de remetente
+- **Botões:** Ícones customizados com hover effects
+- **Welcome Card:** Logo BapGPT na apresentação inicial
 
-### ✅ Experiência do Usuário
-- **Enter** para enviar mensagem
-- **Shift+Enter** para quebra de linha
-- Contador de caracteres (limite: 1000)
-- Botão enviar desabilitado quando vazio
-- Auto-resize do campo de input
+## 🎯 Experiência do Usuário
 
-### ✅ Indicadores Visuais
-- Status de conexão (online/offline)
-- Indicador de digitação animado
-- Notificações toast
-- Scroll automático para mensagens
+### 🔄 Fluxo de Interação
+1. **Carregamento** - Logo e boas-vindas aparecem
+2. **Digitação** - Campo responsivo com contador
+3. **Envio** - Animação de loading com avatar
+4. **Resposta** - Mensagem do bot com avatar BapGPT
+5. **Histórico** - Scroll automático e timestamps
 
-### ✅ Tratamento de Erros
-- Mensagens de erro destacadas
-- Recuperação automática de conexão
-- Validação de entrada
+### 📱 Responsividade
+- **Desktop** - Layout 900px com sidebar de informações
+- **Tablet** - Adaptação para 768px
+- **Mobile** - Interface full-screen otimizada
 
-## 🔄 Fluxo de Funcionamento
+## 🔧 Personalização
 
-1. **Usuário acessa** a interface
-2. **Sistema gera** session ID único  
-3. **Usuário digita** mensagem
-4. **Frontend envia** para API Flask
-5. **Flask processa** via ChatBot OpenAI
-6. **Resposta retorna** para interface
-7. **Mensagem aparece** em tempo real
-8. **Histórico é mantido** durante a sessão
+### Alterar Cores
+Modifique `static/style.css` para alterar:
+- Gradientes do header
+- Cores das mensagens
+- Efeitos de hover
 
-## 🎨 Paleta de Cores
+### Trocar Imagens
+Substitua arquivos em `static/assets/`:
+- Mantenha proporções recomendadas
+- Use formatos PNG/JPG
+- Considere performance (tamanho dos arquivos)
 
-- **Verde Principal:** `#128C7E` (header, botões)
-- **Verde Claro:** `#DCF8C6` (mensagens usuário)
-- **Azul:** `#34B7F1` (avatar usuário)
-- **Branco:** `#FFFFFF` (mensagens bot)
-- **Cinza:** `#F5F5F5` (fundo)
-
-## 📱 Compatibilidade
-
-### ✅ Navegadores Suportados
-- Chrome 80+
-- Firefox 75+
-- Safari 13+
-- Edge 80+
-
-### ✅ Dispositivos
-- Desktop (1024px+)
-- Tablet (768px+)
-- Mobile (320px+)
-
-## 🛠️ Personalização
-
-### Modificar Cores
-Edite o arquivo `static/style.css`:
-```css
-/* Alterar cor principal */
-.chat-header {
-    background: linear-gradient(135deg, #SUA_COR 0%, #SUA_COR_ESCURA 100%);
-}
-```
-
-### Ajustar Layout
+### Personalizar Layout
 Modifique `static/style.css` para alterar:
 - Largura do chat container
 - Altura das mensagens
@@ -184,9 +156,11 @@ No arquivo `templates/index.html`, modifique:
 - [ ] Notificações push
 - [ ] Tema escuro/claro
 - [ ] Tradução de idiomas
+- [ ] Animações mais fluidas
+- [ ] Suporte a emojis nativos
 
 ---
 
-🎉 **Interface Web pronta para uso!** 
+🎉 **Interface Web BapGPT pronta para uso!** 
 
 Acesse http://localhost:5000 e comece a interagir com o assistente do condomínio. 

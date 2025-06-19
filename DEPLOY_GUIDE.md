@@ -1,4 +1,4 @@
-# 🚀 Guia de Deploy - BAP Bot Condomínios
+# 🚀 Guia de Deploy - BapGPT Condomínios
 
 Este guia mostra como fazer deploy da aplicação para ser acessível na web por qualquer pessoa.
 
@@ -18,7 +18,7 @@ Este guia mostra como fazer deploy da aplicação para ser acessível na web por
 2. **Conecte seu GitHub:** Autorize acesso ao repositório
 3. **Novo Web Service:** Selecione o repositório BAP_BOT
 4. **Configurações:**
-   - **Name:** `bap-bot-condominios`
+   - **Name:** `bapgpt-condominios`
    - **Environment:** `Python`
    - **Build Command:** `pip install -r requirements.txt`
    - **Start Command:** `python app.py`
@@ -33,7 +33,7 @@ Este guia mostra como fazer deploy da aplicação para ser acessível na web por
 
 6. **Deploy:** Clique em "Create Web Service"
 
-#### 🌐 **URL Final:** `https://bap-bot-condominios.onrender.com`
+#### 🌐 **URL Final:** `https://bapgpt-condominios.onrender.com`
 
 ---
 
@@ -57,7 +57,7 @@ Este guia mostra como fazer deploy da aplicação para ser acessível na web por
    OPENAI_ASSISTANT_ID=seu_assistant_id_aqui
    ```
 
-#### 🌐 **URL Final:** `https://bap-bot-condominios.up.railway.app`
+#### 🌐 **URL Final:** `https://bapgpt-condominios.up.railway.app`
 
 ---
 
@@ -73,7 +73,7 @@ Este guia mostra como fazer deploy da aplicação para ser acessível na web por
    ```
 3. **Crie app:**
    ```bash
-   heroku create bap-bot-condominios
+   heroku create bapgpt-condominios
    ```
 4. **Configure variáveis:**
    ```bash
@@ -183,4 +183,4 @@ Se tiver problemas com o deploy:
 
 ---
 
-🚀 **Seu BAP Bot estará acessível globalmente em poucos minutos!** 
+🚀 **Seu BapGPT estará acessível globalmente em poucos minutos!** 

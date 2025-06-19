@@ -4,6 +4,7 @@ from chatbot_condominio import ChatBotCondominio
 import json
 from datetime import datetime
 import uuid
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -70,46 +71,64 @@ def chat():
             'session_id': session_id if 'session_id' in locals() else str(uuid.uuid4())
         }), 500
 
-@app.route('/api/history/<session_id>')
+@app.route('/api/history/<session_id>', methods=['GET'])
 def get_history(session_id):
-    """Recupera o histórico de uma sessão"""
-    if session_id in chat_sessions:
+    """Endpoint para recuperar histórico de uma sessão"""
+    try:
+        if session_id in chat_sessions:
+            return jsonify({
+                'history': chat_sessions[session_id]['history'],
+                'session_id': session_id,
+                'status': 'success'
+            })
+        else:
+            return jsonify({
+                'error': 'Sessão não encontrada',
+                'session_id': session_id
+            }), 404
+            
+    except Exception as e:
+        print(f"Erro ao recuperar histórico: {e}")
         return jsonify({
-            'history': chat_sessions[session_id]['history'],
-            'status': 'success'
-        })
-    else:
-        return jsonify({
-            'history': [],
-            'status': 'session_not_found'
-        })
+            'error': 'Erro interno do servidor',
+            'session_id': session_id
+        }), 500
 
 @app.route('/api/new_session', methods=['POST'])
 def new_session():
-    """Cria uma nova sessão de chat"""
-    session_id = str(uuid.uuid4())
-    return jsonify({
-        'session_id': session_id,
-        'message': 'Nova sessão criada com sucesso!',
-        'status': 'success'
-    })
+    """Endpoint para criar nova sessão"""
+    try:
+        new_session_id = str(uuid.uuid4())
+        return jsonify({
+            'session_id': new_session_id,
+            'status': 'success'
+        })
+        
+    except Exception as e:
+        print(f"Erro ao criar nova sessão: {e}")
+        return jsonify({
+            'error': 'Erro interno do servidor'
+        }), 500
 
-@app.route('/health')
-def health():
-    """Endpoint de verificação de saúde da aplicação"""
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Endpoint para verificação de saúde da aplicação"""
     return jsonify({
         'status': 'healthy',
-        'message': 'ChatBot Condomínio está funcionando!',
-        'timestamp': datetime.now().isoformat()
+        'timestamp': datetime.now().isoformat(),
+        'active_sessions': len(chat_sessions)
     })
 
 if __name__ == '__main__':
-    import os
     port = int(os.environ.get('PORT', 5000))
-    debug = os.environ.get('FLASK_ENV') != 'production'
+    debug_mode = os.environ.get('FLASK_ENV') != 'production'
     
-    print("🚀 Iniciando servidor do BAP Bot Condomínios...")
+    print("🚀 Iniciando servidor do BapGPT Condomínios...")
     print(f"📱 Interface disponível na porta: {port}")
     print("🔗 API disponível em: /api/")
     
-    app.run(debug=debug, host='0.0.0.0', port=port) 
+    app.run(
+        host='0.0.0.0',
+        port=port,
+        debug=debug_mode
+    ) 

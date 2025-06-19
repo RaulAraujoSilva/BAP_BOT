@@ -1,5 +1,5 @@
 // Variáveis globais
-let sessionId = null;
+let sessionId = '';
 let messageCount = 0;
 let isTyping = false;
 
@@ -11,106 +11,103 @@ const typingIndicator = document.getElementById('typingIndicator');
 const charCount = document.getElementById('charCount');
 const sessionIdDisplay = document.getElementById('sessionId');
 const messageCountDisplay = document.getElementById('messageCount');
+const infoOverlay = document.getElementById('infoOverlay');
 const infoPanel = document.getElementById('infoPanel');
+
+// Estado da conversa
+let isWaitingForResponse = false;
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
-    initializeChat();
+    generateSessionId();
     setupEventListeners();
+    updateCharCounter();
+    updateMessageCount();
+    
+    // Foca no input
+    messageInput.focus();
 });
 
-// Configura os event listeners
+// Configurar event listeners
 function setupEventListeners() {
     // Input de mensagem
     messageInput.addEventListener('input', function() {
         updateCharCounter();
         updateSendButton();
-        autoResize(this);
+        autoResize();
     });
-
-    messageInput.addEventListener('keydown', function(e) {
+    
+    messageInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            sendMessage();
+            if (!sendButton.disabled) {
+                sendMessage();
+            }
         }
     });
 
+    // Contador de caracteres
+    messageInput.addEventListener('input', updateCharCounter);
+
     // Botão enviar
     sendButton.addEventListener('click', sendMessage);
-
-    // Auto-resize do textarea
-    messageInput.addEventListener('input', function() {
-        autoResize(this);
-    });
 }
 
-// Inicializa o chat
-function initializeChat() {
-    generateSessionId();
-    updateSessionDisplay();
-    updateMessageCount();
-    updateSendButton();
-    messageInput.focus();
-}
-
-// Gera um novo session ID
+// Gerar ID da sessão
 function generateSessionId() {
-    sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+    document.getElementById('sessionId').textContent = sessionId;
 }
 
-// Atualiza o display da sessão
-function updateSessionDisplay() {
-    if (sessionIdDisplay) {
-        sessionIdDisplay.textContent = sessionId ? sessionId.substring(0, 20) + '...' : 'Carregando...';
-    }
-}
-
-// Atualiza contador de mensagens
-function updateMessageCount() {
-    if (messageCountDisplay) {
-        messageCountDisplay.textContent = messageCount;
-    }
-}
-
-// Atualiza contador de caracteres
+// Atualizar contador de caracteres
 function updateCharCounter() {
-    const length = messageInput.value.length;
-    charCount.textContent = length;
-    charCount.style.color = length > 900 ? '#f44336' : '#999';
+    const currentLength = messageInput.value.length;
+    charCount.textContent = currentLength;
+    
+    // Adicionar classe de aviso se próximo do limite
+    if (currentLength > 900) {
+        charCount.style.color = '#ef4444';
+    } else if (currentLength > 800) {
+        charCount.style.color = '#f59e0b';
+    } else {
+        charCount.style.color = '#a0aec0';
+    }
 }
 
-// Atualiza estado do botão enviar
+// Atualizar botão de envio
 function updateSendButton() {
-    const message = messageInput.value.trim();
-    sendButton.disabled = !message || isTyping;
+    const hasContent = messageInput.value.trim().length > 0;
+    sendButton.disabled = !hasContent || isWaitingForResponse;
 }
 
-// Auto-resize do textarea
-function autoResize(textarea) {
-    textarea.style.height = 'auto';
-    textarea.style.height = Math.min(textarea.scrollHeight, 100) + 'px';
+// Auto-redimensionar textarea
+function autoResize() {
+    messageInput.style.height = 'auto';
+    messageInput.style.height = Math.min(messageInput.scrollHeight, 120) + 'px';
 }
 
-// Envia mensagem
+// Enviar mensagem
 async function sendMessage() {
     const message = messageInput.value.trim();
-    
-    if (!message || isTyping) return;
+    if (!message || isWaitingForResponse) return;
 
-    // Adiciona mensagem do usuário
+    // Adicionar mensagem do usuário
     addMessage(message, 'user');
     
-    // Limpa input
+    // Limpar input
     messageInput.value = '';
     updateCharCounter();
     updateSendButton();
-    autoResize(messageInput);
-
-    // Mostra indicador de digitação
+    autoResize();
+    
+    // Mostrar indicador de digitação
     showTypingIndicator();
+    
+    // Definir estado de espera
+    isWaitingForResponse = true;
+    updateSendButton();
 
     try {
-        // Faz requisição para a API
         const response = await fetch('/api/chat', {
             method: 'POST',
             headers: {
@@ -122,236 +119,211 @@ async function sendMessage() {
             })
         });
 
-        const data = await response.json();
-
-        // Remove indicador de digitação
-        hideTypingIndicator();
-
-        if (response.ok) {
-            // Adiciona resposta do bot
-            addMessage(data.response, 'bot', data.timestamp);
-            sessionId = data.session_id;
-            updateSessionDisplay();
-        } else {
-            // Mostra erro
-            addMessage(
-                data.error || 'Desculpe, ocorreu um erro. Tente novamente.',
-                'bot',
-                getCurrentTime(),
-                true
-            );
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-    } catch (error) {
-        console.error('Erro na requisição:', error);
-        hideTypingIndicator();
-        addMessage(
-            'Erro de conexão. Verifique sua internet e tente novamente.',
-            'bot',
-            getCurrentTime(),
-            true
-        );
-    }
 
-    // Foca no input novamente
-    messageInput.focus();
+        const data = await response.json();
+        
+        // Ocultar indicador de digitação
+        hideTypingIndicator();
+        
+        // Adicionar resposta do bot
+        if (data.response) {
+            addMessage(data.response, 'bot');
+        } else {
+            addMessage('Desculpe, ocorreu um erro ao processar sua mensagem.', 'bot');
+        }
+
+    } catch (error) {
+        console.error('Erro ao enviar mensagem:', error);
+        hideTypingIndicator();
+        addMessage('Desculpe, ocorreu um erro de conexão. Tente novamente.', 'bot');
+    } finally {
+        isWaitingForResponse = false;
+        updateSendButton();
+        messageInput.focus();
+    }
 }
 
-// Adiciona mensagem ao chat
-function addMessage(text, type, timestamp = null, isError = false) {
-    // Remove mensagem de boas-vindas se for a primeira mensagem
-    const welcomeMessage = chatMessages.querySelector('.welcome-message');
-    if (welcomeMessage && type === 'user') {
-        welcomeMessage.style.display = 'none';
-    }
-
-    // Cria elemento da mensagem
+// Adicionar mensagem ao chat
+function addMessage(content, type) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${type}-message`;
-
-    // Avatar
-    const avatar = document.createElement('div');
-    avatar.className = 'avatar';
-    avatar.innerHTML = type === 'user' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
-
-    // Conteúdo da mensagem
-    const messageContent = document.createElement('div');
-    messageContent.className = 'message-content';
-    if (isError) {
-        messageContent.style.background = '#ffebee';
-        messageContent.style.borderLeft = '3px solid #f44336';
-    }
-
-    // Texto da mensagem
-    const messageText = document.createElement('div');
-    messageText.innerHTML = formatMessage(text);
-
-    // Timestamp
-    const messageTimestamp = document.createElement('div');
-    messageTimestamp.className = 'message-timestamp';
-    messageTimestamp.textContent = timestamp || getCurrentTime();
-
-    // Monta a estrutura
-    messageContent.appendChild(messageText);
-    messageContent.appendChild(messageTimestamp);
-    messageDiv.appendChild(avatar);
-    messageDiv.appendChild(messageContent);
-
-    // Adiciona ao chat
+    
+    const avatarImg = type === 'user' ? 
+        '/static/assets/Usuário.png' : 
+        '/static/assets/bapgpt-logo.png';
+    
+    messageDiv.innerHTML = `
+        <div class="avatar">
+            <img src="${avatarImg}" alt="${type === 'user' ? 'Usuário' : 'BapGPT'}">
+        </div>
+        <div class="message-content">
+            ${content}
+        </div>
+    `;
+    
     chatMessages.appendChild(messageDiv);
-
-    // Scroll para baixo
     scrollToBottom();
-
-    // Atualiza contador
+    
+    // Incrementar contador de mensagens
     messageCount++;
     updateMessageCount();
 }
 
-// Formata mensagem (quebras de linha, etc.)
-function formatMessage(text) {
-    return text
-        .replace(/\n/g, '<br>')
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em>$1</em>');
-}
-
-// Obtém hora atual
-function getCurrentTime() {
-    return new Date().toLocaleTimeString('pt-BR', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
-    });
-}
-
-// Mostra indicador de digitação
+// Mostrar indicador de digitação
 function showTypingIndicator() {
-    isTyping = true;
     typingIndicator.style.display = 'block';
-    updateSendButton();
     scrollToBottom();
 }
 
-// Esconde indicador de digitação
+// Ocultar indicador de digitação
 function hideTypingIndicator() {
-    isTyping = false;
     typingIndicator.style.display = 'none';
-    updateSendButton();
 }
 
-// Scroll para baixo suave
+// Rolar para o final
 function scrollToBottom() {
     setTimeout(() => {
-        chatMessages.scrollTo({
-            top: chatMessages.scrollHeight,
-            behavior: 'smooth'
-        });
+        chatMessages.scrollTop = chatMessages.scrollHeight;
     }, 100);
+}
+
+// Atualizar contador de mensagens
+function updateMessageCount() {
+    const messageCountElement = document.getElementById('messageCount');
+    if (messageCountElement) {
+        messageCountElement.textContent = messageCount;
+    }
 }
 
 // Nova conversa
 function newConversation() {
-    if (confirm('Deseja iniciar uma nova conversa? O histórico atual será perdido.')) {
-        // Limpa mensagens
-        chatMessages.innerHTML = `
-            <div class="welcome-message">
-                <div class="welcome-card">
-                    <div class="welcome-icon">
-                        <i class="fas fa-home"></i>
-                    </div>
-                    <h3>Bem-vindo ao BAP Bot Condomínios! 🏢</h3>
-                    <p>Estou aqui para ajudar com suas dúvidas sobre:</p>
-                    <ul>
-                        <li>📋 Regulamentos e normas</li>
-                        <li>🏊 Horários das áreas comuns</li>
-                        <li>🎉 Reserva de espaços</li>
-                        <li>🐕 Políticas sobre pets</li>
-                        <li>📞 Contatos importantes</li>
-                    </ul>
-                    <p>Digite sua pergunta abaixo para começar!</p>
-                </div>
-            </div>
-        `;
-
-        // Reset variáveis
-        generateSessionId();
-        messageCount = 0;
-        updateSessionDisplay();
-        updateMessageCount();
-        messageInput.focus();
-
-        // Feedback visual
-        showNotification('Nova conversa iniciada! 🔄');
+    // Confirmar ação
+    if (messageCount > 0) {
+        if (!confirm('Tem certeza que deseja iniciar uma nova conversa? Todas as mensagens atuais serão perdidas.')) {
+            return;
+        }
     }
-}
-
-// Toggle painel de informações
-function toggleInfo() {
-    const isVisible = infoPanel.style.display === 'block';
-    infoPanel.style.display = isVisible ? 'none' : 'block';
     
-    if (!isVisible) {
-        updateSessionDisplay();
-        updateMessageCount();
-    }
-}
-
-// Mostra notificação
-function showNotification(message) {
-    // Cria elemento de notificação
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #4caf50;
-        color: white;
-        padding: 12px 20px;
-        border-radius: 8px;
-        font-size: 14px;
-        z-index: 9999;
-        animation: slideInRight 0.3s ease;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    // Limpar mensagens
+    chatMessages.innerHTML = `
+        <div class="welcome-message">
+            <div class="welcome-card">
+                <div class="welcome-icon">
+                    <img src="/static/assets/bapgpt-logo.png" alt="BapGPT Logo">
+                </div>
+                <h3>Bem-vindo ao BapGPT Condomínios! 🏢</h3>
+                <p>Estou aqui para ajudar com suas dúvidas sobre:</p>
+                <ul>
+                    <li>📋 Regulamentos e normas</li>
+                    <li>🏊 Horários das áreas comuns</li>
+                    <li>🎉 Reserva de espaços</li>
+                    <li>🐕 Políticas sobre pets</li>
+                    <li>📞 Contatos importantes</li>
+                </ul>
+                <p>Digite sua pergunta abaixo para começar!</p>
+            </div>
+        </div>
     `;
-    notification.textContent = message;
-
-    // Adiciona ao DOM
-    document.body.appendChild(notification);
-
-    // Remove após 3 segundos
-    setTimeout(() => {
-        notification.style.animation = 'slideOutRight 0.3s ease forwards';
-        setTimeout(() => {
-            document.body.removeChild(notification);
-        }, 300);
-    }, 3000);
+    
+    // Resetar contadores
+    messageCount = 0;
+    updateMessageCount();
+    
+    // Gerar nova sessão
+    generateSessionId();
+    
+    // Focar no input
+    messageInput.focus();
+    
+    // Fechar painel de informações se estiver aberto
+    hideInfo();
+    
+    console.log('Nova conversa iniciada');
 }
 
-// Adiciona estilos para as animações
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideInRight {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
+// Mostrar/ocultar painel de informações
+function toggleInfo() {
+    const isVisible = infoOverlay.classList.contains('show');
+    
+    if (isVisible) {
+        hideInfo();
+    } else {
+        showInfo();
     }
+}
 
-    @keyframes slideOutRight {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
+// Mostrar painel de informações
+function showInfo() {
+    infoOverlay.classList.add('show');
+    
+    // Atualizar informações dinâmicas
+    updateInfoPanel();
+    
+    // Prevenir scroll do body
+    document.body.style.overflow = 'hidden';
+}
+
+// Ocultar painel de informações
+function hideInfo() {
+    infoOverlay.classList.remove('show');
+    
+    // Restaurar scroll do body
+    document.body.style.overflow = 'auto';
+}
+
+// Atualizar informações do painel
+function updateInfoPanel() {
+    // Atualizar sessão
+    document.getElementById('sessionId').textContent = sessionId;
+    
+    // Atualizar contador de mensagens
+    updateMessageCount();
+    
+    // Atualizar status (sempre online neste contexto)
+    const statusElement = document.querySelector('.status-indicator.online');
+    if (statusElement) {
+        statusElement.textContent = 'Conectado';
     }
-`;
-document.head.appendChild(style);
+}
+
+// A funcionalidade de fechar clicando fora agora está implementada no HTML
+
+// Utilitários de formatação
+function formatText(text) {
+    // Converter quebras de linha em <br>
+    text = text.replace(/\n/g, '<br>');
+    
+    // Converter URLs em links (básico)
+    text = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+    
+    return text;
+}
+
+// Função para detectar erros de conexão
+function handleConnectionError() {
+    addMessage(
+        'Parece que houve um problema de conexão. Verifique sua internet e tente novamente.',
+        'bot'
+    );
+}
+
+// Função para validar entrada
+function validateInput(message) {
+    if (message.length > 1000) {
+        alert('Mensagem muito longa. O limite é de 1000 caracteres.');
+        return false;
+    }
+    
+    return true;
+}
+
+// Debug: log de eventos importantes
+function logEvent(event, data = {}) {
+    console.log(`[BapGPT] ${event}:`, data);
+}
 
 // Verificação de conexão
 async function checkConnection() {

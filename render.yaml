@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: bap-bot-condominios
+    name: bapgpt-condominios
     env: python
     buildCommand: pip install -r requirements.txt
     startCommand: python app.py

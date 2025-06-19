@@ -1,4 +1,4 @@
-# ChatBot Assistente de Condomínio
+# BapGPT Condomínios
 
 Este projeto implementa um chatbot simples usando a API de Assistentes da OpenAI, especializado para atendimento de condomínios.
 
@@ -43,6 +43,7 @@ python chatbot_condominio.py
 - ✅ **Cores distintas** para usuário e chatbot
 - ✅ **Bolhas de mensagem** como WhatsApp
 - ✅ **Indicador de digitação** em tempo real
+- ✅ **Imagens personalizadas** para avatares e ícones
 - ✅ Integração com OpenAI Assistants API
 - ✅ Respostas baseadas na base de conhecimento configurada
 - ✅ Redirecionamento para gerente quando não souber a resposta
@@ -85,6 +86,7 @@ Por segurança, as credenciais são armazenadas no arquivo `config.env` (não ve
 - **Indicador de digitação** - Quando o assistente está processando
 - **Timestamps** - Horário de cada mensagem
 - **Scroll automático** - Para a mensagem mais recente
+- **Avatares personalizados** - Imagens específicas para usuário e BapGPT
 
 ### 💻 Chat no Terminal
 - Digite qualquer pergunta para interagir
@@ -98,6 +100,7 @@ Por segurança, as credenciais são armazenadas no arquivo `config.env` (não ve
 - `templates/index.html` - **Interface HTML estilo WhatsApp**
 - `static/style.css` - **Estilos CSS modernos**
 - `static/script.js` - **JavaScript para funcionalidades**
+- `static/assets/` - **Pasta com imagens e recursos visuais**
 
 ### 🤖 Chatbot Core
 - `chatbot_condominio.py` - Classe principal do chatbot
@@ -110,4 +113,14 @@ Por segurança, as credenciais são armazenadas no arquivo `config.env` (não ve
 - `.gitignore` - Arquivos ignorados pelo Git
 - `SEGURANCA.md` - **Guia completo de segurança**
 - `INTERFACE_WEB.md` - **Documentação da interface web**
+- `DEPLOY_GUIDE.md` - **Guia para deploy em produção**
 - `README.md` - Este arquivo de instruções 
+
+## 🎨 Recursos Visuais
+
+### 📁 Assets Organizados em `static/assets/`
+- `bapgpt-logo.png` - Logo principal do BapGPT
+- `Usuário.png` - Avatar para mensagens do usuário
+- `SetaSubmeter.png` - Ícone do botão enviar
+- `Icone_superior1.jpg` - Ícone para nova conversa
+- `Icone_superior2.jpg` - Ícone para informações 
