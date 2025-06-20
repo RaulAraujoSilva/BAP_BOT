@@ -153,7 +153,7 @@ function addMessage(content, type) {
     
     const avatarImg = type === 'user' ? 
         '/static/assets/Usuário.png' : 
-        '/static/assets/bapgpt-logo.png';
+        '/static/assets/robo_bap.jpeg';
     
     messageDiv.innerHTML = `
         <div class="avatar">
@@ -212,18 +212,19 @@ function newConversation() {
         <div class="welcome-message">
             <div class="welcome-card">
                 <div class="welcome-icon">
-                    <img src="/static/assets/bapgpt-logo.png" alt="BapGPT Logo">
+                    <img src="/static/assets/robo_bap.jpeg" alt="BapGPT Logo">
                 </div>
-                <h3>Bem-vindo ao BapGPT Condomínios! 🏢</h3>
-                <p>Estou aqui para ajudar com suas dúvidas sobre:</p>
+                <h3>Olá! 👋 Sou o BapGPT, seu assistente especializado em administração condominial!</h3>
+                <p>Baseado no Manual do Síndico da ABADI, posso ajudar com:</p>
                 <ul>
-                    <li>📋 Regulamentos e normas</li>
-                    <li>🏊 Horários das áreas comuns</li>
-                    <li>🎉 Reserva de espaços</li>
-                    <li>🐕 Políticas sobre pets</li>
-                    <li>📞 Contatos importantes</li>
+                    <li>🏢 Gestão condominial - estrutura, convenções, regimentos</li>
+                    <li>👥 Gestão de pessoas - contratação, direitos trabalhistas</li>
+                    <li>💰 Finanças - orçamentos, cotas, prestação de contas</li>
+                    <li>🔧 Manutenção - obras, autovistorias, reparos</li>
+                    <li>🗳️ Assembleias - convocação, votação, conflitos</li>
+                    <li>⚖️ Questões legais - legislação, seguros, compliance</li>
                 </ul>
-                <p>Digite sua pergunta abaixo para começar!</p>
+                <p><strong>Como posso ajudá-lo hoje com sua administração condominial?</strong></p>
             </div>
         </div>
     `;
